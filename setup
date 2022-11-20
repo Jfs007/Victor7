@@ -1,0 +1,25 @@
+#!/usr/bin/env node
+// 安装Victor
+
+
+let command = require('./command/index');
+command();
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

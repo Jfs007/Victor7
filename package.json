@@ -1,0 +1,14 @@
+{
+  "name": "victor7",
+  "version": "1.0.7",
+  "description": "",
+  "main": "setup",
+  "scripts": {
+    "intro": "echo \"hello victor\" && exit 1"
+  },
+  "bin": {
+    "victor": "./setup"
+  },
+  "author": "Jf.s",
+  "license": "ISC"
+}
