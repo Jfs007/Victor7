@@ -16,6 +16,7 @@ class Navigate {
         let navigate = this;
         this.app = app;
         this.define = Define.define(this.app, ['switchTab', 'reLaunch', 'redirectTo', 'navigateTo', 'navigateBack']);
+        this.define.navigateBaseTo = this.navigateBaseTo;
         Object.keys(this.define).map(key => {
             Object.defineProperty(this.app, key, {
                 get: function () {
@@ -55,7 +56,7 @@ class Navigate {
         } else {
             options.delta = delta || 1;
         }
-        this.setQuery(options);
+        this.setQuery({ url: '' });
         this.define['navigateBack'].call(this.app, options);
     }
     navigateBaseTo(query) {
@@ -122,7 +123,12 @@ function use(key, value) {
     vic.use(key, value);
 }
 
+function changeQuery(options = {}) {
+    vic.navigate.query = (Object.assign(query(), options || {}))
+}
+
 export {
+    changeQuery,
     query,
     vic,
     use
