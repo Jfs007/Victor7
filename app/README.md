@@ -19,10 +19,11 @@ vic.setup(wx);
 ```
 包详解
 ```shell
-import { use, query } from 'vic-app';
+import { use, query, changeQuery } from 'vic-app';
 
 // use 为你的vic添加上属性
 // query() 返回当前页面的页面query
+// changeQuery(q) 改变当前页面的query
 ```
 
 
