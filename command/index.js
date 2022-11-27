@@ -11,7 +11,7 @@ async function command() {
     let command = load[commandName];
     if(command) {
         command.config(configLoad);
-        command.run(_args);
+        command.run(_args, process.cwd());
         
     }else {
         loader.console.warn('不存在的命令【' + commandName + '】')

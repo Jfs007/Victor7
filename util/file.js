@@ -56,6 +56,7 @@ async function readdir({ path, root = __dirname }) {
 async function stat({ path, root = __dirname }) {
     try {
         let stat = await promisify.nodejs(fs.stat)(Resolve(root, path));
+       
         return File({ content: stat });
     } catch (error) {
         return File({ content: null, error: true, message: error })
@@ -73,7 +74,10 @@ function type({ path }) {
 function name({ path }) {
     let url = path.replace(/.*\/(.*\..*)$/gi, "$1");
     return File({ content: url, })
-  }
+}
+
+
+
 
 
 

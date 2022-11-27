@@ -1,0 +1,4 @@
+node_modules
+command/install/.tempFile/
+app/node_modules
+app/weapp

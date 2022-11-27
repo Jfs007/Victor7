@@ -1,67 +1,58 @@
 const shell = require('shelljs');
 const promisify = require('../../../util/promisify');
-const File = require('../../../util/file');
 const Base = require('../../../component/base');
 let exec = promisify.shelljs(shell.exec).bind(shell);
 const uuid = require('node-uuid')
 class Software extends Base {
     key = '';
-    #tempPath = File.Resolve(__dirname, '../.tempFile/');
-    depend = ['zip'];
     constructor(options = {}) {
         super();
-        this.app = '';
         this.id = uuid.v4();
-        // 下载地址
-        this.url = '';
-        // 文件类型
-        this.type = '';
-        // 文件名称
-        this.name = '';
-        console.log(this.id)
+        this.shell = shell;
+        this.app = '';
         super.init(options);
-        // this.setup();
     }
-
-
-    setup(installer) {
-        this.name = this.name || File.name({ path: this.url }).content;
-        this.type = File.type({ path: this.name || this.url }).content;
-        this.run();
-        // installer.on('exit', () => {
-        //     // exec(`rm -rf`)
-        // })
-
-    }
-
 
 
     async run() {
+        let args = Array.prototype.slice.call(arguments);
+        
         try {
-            
-            shell.cd(this.#tempPath)
-            await exec(`curl -L ${this.url} -o ${this.name}`);
-            await this.unzip();
-            await this.rm();
-
-
+            return await exec(`${this.app} ` + args.join(' '))
         } catch (error) {
-            console.log(error)
+            this.console.error(error.content);
+        }
+        
+    }
+
+    async setup() {
+        if (await this.isInstall()) {
+            this.console.warn(`${this.app}已安装`);
+            return;
+        }
+        try {
+            await this.install();
+        } catch (error) {
         }
     }
 
-    async install() {
-
+    exec(value) {
+        return exec(value);
     }
 
-    async rm() {
-        return await exec(`rm -rf ${this.name}`);
-    }
-    async unzip() {
-        let v = shell.which('zip');
-        if (v.code == 0) {
-            await exec(`unzip -d ./${this.id} ${this.name}`);
+
+    async isInstall() {
+        try {
+            await this.exec(`which ${this.app}`);
+            return true;
+        } catch (error) {
+            return false;
         }
+
+
+    }
+    install() {
+
     }
 
 
