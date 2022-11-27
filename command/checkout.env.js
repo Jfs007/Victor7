@@ -16,6 +16,7 @@ class CheckOutEnvCommand extends Command {
 
     }
     async run(args) {
+        
         let [env] = args;
         let envPackage = `./${this.cfg.envPackage}/`; 
         this.cwd = process.cwd();
@@ -26,6 +27,7 @@ class CheckOutEnvCommand extends Command {
             return;
         }
         let _var = textParse.object(v.content || '');
+        _var['PROCESS_ENV'] = env;
         this._var = _var;
         let content = `module.exports = ${JSON.stringify(_var)}`
         await file.write({ path: envPackage + 'index.js' , content , root: this.cwd });

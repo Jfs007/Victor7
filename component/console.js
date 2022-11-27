@@ -1,3 +1,5 @@
+
+const chalk = require('chalk');
 class Console {
     constructor() {
 
@@ -10,6 +12,10 @@ class Console {
     }
     warn(info) {
         console.log('\x1B[33m', info);
+    }
+
+    color(color, info) {
+        console.log(chalk.white.bgRgb(...color)(info))
     }
 }
 

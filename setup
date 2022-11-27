@@ -2,6 +2,7 @@
 // 安装Victor
 
 
+
 let command = require('./command/index');
 command();
 

@@ -10,10 +10,16 @@ class CommandLoader extends Loader {
     async setup() {
         let v = await File.readdir({ path: this.directory });
         let files = v.content.filter(_ => _ != 'index.js');
-        files.map(file => {
+        let loads = async file => {
+            let stat = await File.stat({ path: this.directory + file });
+            let isDirectory = stat.content.isDirectory();
+            file = isDirectory ? file + '/' + 'index.js' : file;
             let command = new (require(this.directory + file))();
             this.load[command.name] = command;
-        });
+        }
+        await Promise.all(files.map(file => {
+            return loads(file);
+        }));
         this.complete();
         return this.load;
     }

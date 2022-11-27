@@ -1,8 +1,6 @@
-let promisify = (func) => {
+let nodejs = (func) => {
     function ify(...args) {
         return new Promise((resolve, reject) => {
-
-
             args.push(function (error, value) {
                 if (error) {
                     reject(error)
@@ -11,13 +9,29 @@ let promisify = (func) => {
                 }
             });
             return func(...args);
-
         });
     }
     return ify;
 
 }
 
-module.exports = { promisify };
+
+let shelljs = (func) => {
+    function ify(...args) {
+        return new Promise((resolve, reject) => {
+            args.push(function (code, stdout, stderr) {
+                if (code != 0) {
+                    reject({ content: stderr })
+                } else {
+                    resolve({ content: stdout.replace(/\n$/, '') });
+                }
+            });
+            return func(...args);
+        });
+    }
+    return ify;
+}
+
+module.exports = { nodejs, shelljs };
 
 

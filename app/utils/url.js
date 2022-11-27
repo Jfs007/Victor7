@@ -11,6 +11,19 @@ function query(url) {
     })
     return json;
 }
+
+function toSearch(query) {
+    let search = '';
+    Object.keys(query).map(key => {
+        let value = query[key];
+        let _ = search ? '&' : '?';
+        search+= `${_}${key}=${value}` 
+    });
+    return search;
+}
+
+
 export default {
-    query
+    query,
+    toSearch
 }

@@ -9,10 +9,14 @@ class Navigate extends Base {
     alias = '$n';
     delta = -1;
     define = {};
+    Url = Url;
     query = {};
     constructor() {
         super();
     }
+
+    
+
     setup(app) {
         let navigate = this;
         this.app = app;
@@ -50,14 +54,14 @@ class Navigate extends Base {
         this.define['navigateTo'].call(this.app, options);
     }
     navigateBack(options = {}) {
-        let { delta } = options;
+        let { delta, url } = options;
         if (delta == 'base' && this.pointer) {
             options.delta = this.getDelta();
             this.base();
         } else {
             options.delta = delta || 1;
         }
-        this.setQuery({ url: '' });
+        this.setQuery({ url: url || '' });
         this.define['navigateBack'].call(this.app, options);
     }
     navigateBaseTo(query) {

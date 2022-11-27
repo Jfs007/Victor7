@@ -57,14 +57,13 @@ function use(key, value) {
     vic.use(key, value);
 }
 
-const navigate = vic.navigate;
+
 
 export {
     changeQuery,
     query,
     vic,
-    use,
-    navigate
+    use
 
 }
 
