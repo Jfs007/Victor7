@@ -13,6 +13,11 @@ class Software extends Base {
         super.init(options);
     }
 
+    config(options) {
+        this.init(options);
+        return this;
+    }
+
 
     async run() {
         let args = Array.prototype.slice.call(arguments);

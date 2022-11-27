@@ -11,8 +11,10 @@ class Loader extends Base {
     complete() {
         this.isload = true;
     }
-    launch() {
-        
+    async launch() {
+        if(this.isload) return this.load;
+        return this.load;
+
     }
     setup() {}
     

@@ -4,6 +4,7 @@ const Zip = require('../core/zip');
 
 class AppSoftware extends Software {
     key = 'app';
+    static key = 'app';
     #appPath = '/Applications/';
     #tempPath = File.Resolve(__dirname, '../.tempFile');
     constructor(options) {
@@ -14,6 +15,10 @@ class AppSoftware extends Software {
         // 文件名称
         this.name = '';
         super.init(options);
+    }
+
+    get pureName() {
+        return this.name.split('.')[0];
     }
     setup(installer) {
         this.name = this.name || File.name({ path: this.url }).content;
@@ -33,20 +38,40 @@ class AppSoftware extends Software {
 
     }
 
+    isMacHdiApp() {
+        return this.type == 'pkg' || this.type == 'dmg';
+    }
+
+    async pkgInstall() {
+        await this.exec(`hdiutil attach ${this.name}`);
+        await this.exec(`hdiutil detach "/Volumes/${this.pureName} Installer/"`);
+        
+        // await this.exec(`cp -rf "/Volumes/${this.pureName}\ Installer/${this.app}" "/Volumes/${this.pureName}\ Installer/Applications"`);
+    }
+
     async install() {
         this.shell.cd(this.#tempPath);
         try {
 
-
             await this.exec(`curl -L ${this.url} -o ${this.name}`);
+            if(this.isMacHdiApp()) {
+                await this.pkgInstall();
+                await this.rm(this.name);
+                return;
+            }
             await this.unzip();
             await this.rm(this.name);
             await this.cp();
             await this.rm(`./${this.name}-unzip`)
         } catch (error) {
-            console.log(error)
+            // console.log(error)
         }
     }
+
+
+
+
+
 
     async rm(path) {
         return await this.exec(`rm -rf ${path}`);

@@ -14,7 +14,18 @@ class Command extends Base {
         super();
         super.init(options);
        
+        
     }
+    // 命令前置动作
+    async setup() {
+
+    }
+    // 命令启动动作
+    async launch() {
+
+    }
+    
+
     config(cfg) {
         this.cfg = Object.assign({}, this.cfg || {}, cfg);
     }

@@ -1,81 +1,81 @@
 
 const Command = require('../../component/command');
-const shell = require('shelljs');
+const Loader = require('../../component/loader');
 const File = require('../../util/file');
-const promisify = require('../../util/promisify');
-const exec = promisify.shelljs(shell.exec).bind(shell);
-
-const AppSoftware = require('./component/app-software');
 const e = require('events');
-
-
-
-const Brew = require('./core/brew');
-
-// Brew.run('--help');
-
-
+const ProLoaded = require('./preloaded');
 
 class InstallCommand extends Command {
-    #scriptName = '.install'
+    #scriptName = '.install';
     constructor() {
         super();
         this.name = 'i';
         this.e = new e.EventEmitter();
-        this.load();
-    }
-    load() {
-        // 加载自定义脚本
+        this._software = [];
+        this.componentLoader = new Loader();
 
     }
+    async setup() {
+        if (this.componentLoader.isload) return this.componentLoader.load;
+        let Software = {};
+        let dir = await File.readdir({ path: './component/', root: __dirname });
+        dir.content.map(componentName => {
+            let sw = require(`./component/${componentName}`);
+            Software[sw.key] = sw;
+        });
+        this.componentLoader.load = Software;
+        this.componentLoader.complete();
+        return this.componentLoader.load;
+
+    }
+
+    launch() {
+        this.loadPreloadedSoftware();
+    }
+
+    addSoftware(app) {
+        if (!this.isLoadSoftware(app)) {
+            let Component = this.componentLoader.load[app.key];
+            this._software.push(new Component(app));
+        }
+    }
+
+
+
+    isLoadSoftware(app) {
+        let appid = app.key + '-' + app.name;
+        let has = this._software.find(software => {
+            let swid = software.key + '-' + software.name;
+            return swid === appid;
+        });
+        return !!has;
+    }
+
+
+    loadPreloadedSoftware() {
+        ProLoaded.map(app => {
+            this.addSoftware(app);
+        })
+    }
     async run(args, cwd) {
-        let scriptPath = cwd + '/.install/index.js';
+        let scriptPath = cwd + `/${this.#scriptName}/index.js`;
         let stat = await File.stat({ path: scriptPath });
+
         if (!stat.error) {
             let script = require(scriptPath);
             script(this)
-        }
-        new AppSoftware({
-            app: 'Visual Studio Code2.app',
-            url: 'https://vscode.cdn.azure.cn/stable/c3f126316369cd610563c75b1b1725e0679adfb3/VSCode-darwin-universal.zip'
-        }).setup(this);
+        };
+
+        this._software.map(sw => {
+            sw.setup(this);
+        })
         process.on('SIGINT', async () => {
             await this.e.emit('exit');
             process.exit();
 
         });
-        // await this.checkInstaller();
     }
-    // 检查安装器
-    async checkInstaller() {
-        try {
-            // 判断brew是否安装
-            return await exec('which brew1');
-        } catch (error) {
-            await this.curlInstaller();
-            return error;
-        }
-    }
-    async curlInstaller() {
 
-
-        try {
-            // let v = await exec(`
-            // curl -LO https://github.com/yanue/V2rayU/releases/download/3.2.0/V2rayU.dmg
-
-            //  `);
-            //  console.log(v)
-            //  await exec(`hdiutil attach V2rayU.dmg`);
-            //  await exec(`cp -rf "/Volumes/V2rayU\ Installer/V2rayU.app" "/Volumes/V2rayU\ Installer/Applications"`);
-            //  await exec(`hdiutil detach "/Volumes/V2rayU Installer/"`)
-
-        } catch (error) {
-            console.log(error)
-        }
-
-      
-
-    }
 
 }
 

@@ -11,6 +11,8 @@ async function command() {
     let command = load[commandName];
     if(command) {
         command.config(configLoad);
+        await command.setup();
+        await command.launch();
         command.run(_args, process.cwd());
         
     }else {

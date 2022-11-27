@@ -4,11 +4,12 @@ let {
     resolve
 } = require('path');
 
-function File({ content = '', error = false, message = '' } = options) {
+function File({ content = '', error = false, message = '', path = '' } = options) {
     return {
         content,
         error: error === undefined ? false : error,
-        message
+        message,
+        path
     }
 }
 
@@ -55,9 +56,11 @@ async function readdir({ path, root = __dirname }) {
 
 async function stat({ path, root = __dirname }) {
     try {
-        let stat = await promisify.nodejs(fs.stat)(Resolve(root, path));
+        let Pid = Resolve(root, path);
        
-        return File({ content: stat });
+        let stat = await promisify.nodejs(fs.stat)(Pid);
+       
+        return File({ content: stat, path: Pid  });
     } catch (error) {
         return File({ content: null, error: true, message: error })
     }
