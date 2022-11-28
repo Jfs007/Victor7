@@ -26,6 +26,7 @@ let shelljs = (func) => {
                     resolve({ content: stdout.replace(/\n$/, '') });
                 }
             });
+          
             return func(...args);
         });
     }

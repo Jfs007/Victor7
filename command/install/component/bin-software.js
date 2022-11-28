@@ -15,6 +15,7 @@ class BinSoftware extends Software {
         super.setup();
     }
     install() {
+        super.install();
         Brew.run('install', this.app);
     }
 }

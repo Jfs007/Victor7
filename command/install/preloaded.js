@@ -8,15 +8,15 @@ const Apps = [
     },
     {
         app: 'V2rayU.app',
-        key: 'bin',
+        key: 'app',
         tag: ['SSR'],
         url: 'https://github.com/yanue/V2rayU/releases/download/3.2.0/V2rayU.dmg',
     },
-    {
-        app: 'mysql',
-        key: 'bin',
-        tag: ['后端']
-    }
+    // {
+    //     app: 'mysql',
+    //     key: 'bin',
+    //     tag: ['后端']
+    // }
 
 ];
 

@@ -41,6 +41,8 @@ class Software extends Base {
         }
     }
 
+    
+
     exec(value) {
         return exec(value);
     }
@@ -57,6 +59,7 @@ class Software extends Base {
 
     }
     install() {
+        this.console.log('准备开始安装' + this.app);
 
     }
 

@@ -1,6 +1,8 @@
 
 
-
 module.exports = Install = (Install) => {
-    console.log('install 被安装');
+    Install.addSoftware({
+        app: 'mysql',
+        key: 'bin'
+    })
 }

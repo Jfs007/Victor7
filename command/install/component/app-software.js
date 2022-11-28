@@ -1,7 +1,8 @@
 let Software = require('../core/software');
 const File = require('../../../util/file');
 const Zip = require('../core/zip');
-
+const fs = require('fs');
+const http = require('node:http');
 class AppSoftware extends Software {
     key = 'app';
     static key = 'app';
@@ -50,10 +51,11 @@ class AppSoftware extends Software {
     }
 
     async install() {
+        super.install();
         this.shell.cd(this.#tempPath);
         try {
 
-            await this.exec(`curl -L ${this.url} -o ${this.name}`);
+            await this.curl();
             if(this.isMacHdiApp()) {
                 await this.pkgInstall();
                 await this.rm(this.name);
@@ -67,6 +69,30 @@ class AppSoftware extends Software {
             // console.log(error)
         }
     }
+
+    async curl() {
+        
+        await this.exec(`curl -L# ${this.url} -o ${this.name}`);
+        
+        // let stream = fs.createWriteStream(this.#tempPath + '/' + this.name);
+        // let _curl = http.request(this.url).pipe(stream);
+
+       
+        // return new Promise((resolve, reject) => {
+        //     _curl.on("close", function (data) {
+        //         console.log("文件" + data + "下载完毕");
+        //         resolve()
+        //     });
+        //     _curl.on("data", function(a, b, c) {
+        //         console.log(a, b, c)
+        //         reject()
+        //     })
+
+
+        // })
+        
+        
+     }
 
 
 

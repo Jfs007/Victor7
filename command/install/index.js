@@ -5,6 +5,7 @@ const File = require('../../util/file');
 const e = require('events');
 const ProLoaded = require('./preloaded');
 
+
 class InstallCommand extends Command {
     #scriptName = '.install';
     constructor() {
@@ -52,6 +53,7 @@ class InstallCommand extends Command {
     }
 
 
+
     loadPreloadedSoftware() {
         ProLoaded.map(app => {
             this.addSoftware(app);
@@ -65,7 +67,6 @@ class InstallCommand extends Command {
             let script = require(scriptPath);
             script(this)
         };
-
         this._software.map(sw => {
             sw.setup(this);
         })
