@@ -1,7 +1,6 @@
 
 import Console from './console';
 class Base {
-    app = null;
     constructor(Vic, ctx) {
         this.console = new Console();
     }

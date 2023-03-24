@@ -1,38 +1,74 @@
 
-import Base from "../core/base";
+import Component from "../core/component";
+
+
+let getToken = (key) => {
+    return wx.getStorageSync(key)
+}
+
+let removeToken = (key) => {
+    try {
+        wx.removeStorage({
+            key: key
+        })
+    } catch (e) { }
+
+}
+let setToken = (key, value) => {
+    try {
+        wx.setStorageSync(key, value)
+    } catch (e) { }
+}
 
 
 
-class Auth extends Base {
+class Auth extends Component {
     _name = 'auth';
     key = 'vic-auth';
     alias = '$a';
-    constructor(Vic) {
+
+    userInfo = {
+        token: undefined
+    };
+    constructor() {
         super();
+        this.userInfo.token = this.getToken();
+    }
+
+
+    updateUserInfo(info = {}) {
+        Object.keys(info).map(key => {
+            let value = info[key];
+            this.userInfo[key] = value;
+        });
     }
 
     setup(options = {}) {
         this.init(options);
     }
 
-    login() {
-        
+    login(useInfo) {
+        this.updateUserInfo(useInfo);
+        this.setToken(useInfo.token);
     }
 
     logout() {
-
+        this.updateUserInfo({
+            token: ''
+        })
+        this.removeToken();
     }
 
-    setToken() {
-
+    setToken(value) {
+        setToken(this.key, value)
     }
 
     removeToken() {
-
+        removeToken(this.key);
     }
 
     getToken() {
-
+        return getToken(this.key);
     }
 
 }

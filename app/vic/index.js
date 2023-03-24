@@ -1,6 +1,11 @@
 
 import Navigate from './navigate';
 import Auth from './auth';
+import Scene from './scene';
+import LanuchApp from './launchApp';
+
+import Component from '../core/component';
+
 /**
  * Victor 维克托 
  * 加入光荣的进化吧
@@ -10,13 +15,24 @@ import Auth from './auth';
 class VicApp {
     name = 'vic';
     env = null;
+    // 预设组件
+    __components = {
+        Navigate,
+        Auth,
+        Scene,
+        LanuchApp
+    };
+
+
     constructor() {
     }
     setup(App) {
         this.app = App;
         this.app[this.name] = this;
-        this.load(Navigate).setup(this.app);
-        this.load(Auth);
+        Object.keys(this.__components).map(componentName => {
+            this.load(this.__components[componentName]).setup(this);
+        });
+
     }
     use(key, value) {
         this[key] = value;
@@ -25,6 +41,7 @@ class VicApp {
         let component = new Component();
         this[component.alias] = component;
         this[component._name] = component;
+        component.inject(this);
         return component;
     }
 
@@ -44,24 +61,71 @@ function query(options = {}) {
     return query;
 }
 
+// v2.0弃用
+// function changeQuery(options = {}) {
+//     let context = getContext();
+//     vic.navigate.query = (Object.assign(query(), options || {}));
+//     if (context && context.options) {
+//         context.options = vic.navigate.query;
+//     }
+// }
 
-function changeQuery(options = {}) {
+function changeOptions(options) {
     let context = getContext();
-    vic.navigate.query = (Object.assign(query(), options || {}));
     if (context && context.options) {
-        context.options = vic.navigate.query;
+        context.options = Object.assign(context.options || {}, options);
     }
 }
+
 
 function use(key, value) {
     vic.use(key, value);
 }
 
 
+function register(name, Component) {
+    if (vic.__components[name]) return;
+    vic.__components[name] = Component;
+    vic.load(Component).setup(vic);
+}
+
+// 只对Page有效 developing
+function effect(Page, PageOptions = {}) {
+    let { onRoute, onUnload, onShow } = PageOptions;
+    let routeFunction = (scope) => {
+        onRoute(scope);
+    };
+    // let isOn = false;
+    // PageOptions.onShow = function() {
+    //     if(onRoute && !isOn) {
+    //         vic.navigate.onRoute(routeFunction.bind(this));
+    //         isOn = true;
+    //     }
+        
+    //     onShow && onShow.call(this);
+    // }
+
+    // PageOptions.onUnload = function () {
+    //     vic.navigate.offRoute(routeFunction.bind(this));
+    //     onUnload && onUnload.call(this);
+    //     isOn = false;
+    // }
+    return Page(PageOptions);
+}
+
+
+
+
+
 
 export {
-    changeQuery,
+    // effect,
+    register,
+    Component,
+    // changeQuery,
+    changeOptions,
     query,
+    getContext,
     vic,
     use
 

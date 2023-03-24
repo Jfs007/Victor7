@@ -9,6 +9,7 @@ module.exports = {
         name: 'vicApp',
         type: 'umd',
     },
+    // 需要自己创建小程序项目weapp vic为打包目录
     path: path.resolve(__dirname, "../weapp/vic"),
     filename: "index.js"
   }

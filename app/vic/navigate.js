@@ -1,29 +1,41 @@
 
 import Define from '../core/define';
 import Url from '../utils/url';
-import Base from '../core/base';
-class Navigate extends Base {
+import Component from '../core/component';
+import { getContext } from '.'
+
+
+class Navigate extends Component {
     _name = 'navigate';
-    app = null;
-    pointer = null;
     alias = '$n';
+    pointer = null;
     delta = -1;
     define = {};
-    Url = Url;
     query = {};
+
+    history = [];
+
+    pushRoute = '';
+
+
+
+
+
+
+
+
+
     constructor() {
         super();
     }
 
-    
-
-    setup(app) {
+    setup(vic) {
+        super.setup(vic);
         let navigate = this;
-        this.app = app;
-        this.define = Define.define(this.app, ['switchTab', 'reLaunch', 'redirectTo', 'navigateTo', 'navigateBack']);
+        this.define = Define.define(this.__app, ['switchTab', 'reLaunch', 'redirectTo', 'navigateTo', 'navigateBack']);
         this.define.navigateBaseTo = this.navigateBaseTo;
         Object.keys(this.define).map(key => {
-            Object.defineProperty(this.app, key, {
+            Object.defineProperty(this.__app, key, {
                 get: function () {
                     return navigate[key].bind(navigate);
                 }
@@ -38,20 +50,36 @@ class Navigate extends Base {
 
     }
     switchTab(options = {}) {
+        options = this.done({ options, routeFunction: 'switchTab' }, (path) => {
+            this.history = [path]
+        })
         this.setQuery(options);
-        this.define['switchTab'].call(this.app, options);
+        this.define['switchTab'].call(this.__app, options);
     }
     reLaunch(options = {}) {
+        options = this.done({ options, routeFunction: 'reLaunch' }, (path) => {
+            this.history = [path]
+        })
         this.setQuery(options);
-        this.define['reLaunch'].call(this.app, options);
+
+        this.define['reLaunch'].call(this.__app, options);
     }
     redirectTo(options = {}) {
+        options = this.done({ options, routeFunction: 'redirectTo' }, (path) => {
+            this.history.pop();
+            this.history.push(path);
+        })
         this.setQuery(options);
-        this.define['redirectTo'].call(this.app, options);
+
+        this.define['redirectTo'].call(this.__app, options);
     }
     navigateTo(options = {}) {
+        options = this.done({ options, routeFunction: 'navigateTo' }, (path) => {
+            this.history.push(path);
+        });
         this.setQuery(options);
-        this.define['navigateTo'].call(this.app, options);
+
+        this.define['navigateTo'].call(this.__app, options);
     }
     navigateBack(options = {}) {
         let { delta, url } = options;
@@ -61,8 +89,12 @@ class Navigate extends Base {
         } else {
             options.delta = delta || 1;
         }
+        options = this.done({ options, routeFunction: 'navigateBack' }, (path) => {
+            this.history = this.history.slice(0, this.history.length - (options.delta || 1));
+            // this.history.pop();
+        });
         this.setQuery({ url: url || '' });
-        this.define['navigateBack'].call(this.app, options);
+        this.define['navigateBack'].call(this.__app, options);
     }
     navigateBaseTo(query) {
         let Pages = getCurrentPages();
@@ -75,12 +107,87 @@ class Navigate extends Base {
         this.delta = -1;
     }
 
+    getPureUrl(url) {
+        return (url || '').replace(/\?.*/, '');
+    }
+
     getDelta() {
         let pointer = this.pointer;
         let delta = this.delta;
         if (!pointer) return -1;
         let Pages = getCurrentPages();
         return Pages.length - delta;
+    }
+
+
+    done({ options, routeFunction } = op, done = () => { }) {
+        this.pushRoute = '';
+        let ctx = getContext();
+        let { onShow } = ctx;
+        let navigate = this;
+
+        let url = options.url;
+        if(!url || routeFunction == 'navigateBack') {
+            url = this.history[this.history.length - 2] || '';
+        }
+        let path = url.replace(/\?.*/, '');
+        let _success = options.success;
+        options.success = function (value) {
+
+            done(path, options);
+            _success && _success(value);
+            if (!navigate.pushRoute) {
+                navigate.__e.emit('onRoute', {
+                    to: path,
+                    from: ctx.route
+                });
+                navigate.pushRoute = path.replace(/^\//, '');
+            }
+
+
+            if (!ctx.__register) {
+                ctx.onShow = function (value) {
+                    let from = navigate.history.slice(-1)[0];
+                    from = from.replace(/^\//, '');
+                    if (navigate.pushRoute === from) {
+                        navigate.__e.emit('onRoute', {
+                            to: ctx.route,
+                            from
+                        });
+                        navigate.history.pop();
+                        navigate.pushRoute = ctx.route.replace(/^\//, '');
+                    }
+                    onShow.call(ctx, value);
+                    ctx.__freeze = false;
+                };
+            }
+            ctx.__register = true;
+        }
+
+        return options;
+    }
+
+    freezeOnShow() {
+        getCurrentPages().map(page => {
+            if (page.__register) {
+                page.__freeze = true;
+            }
+        })
+    }
+
+
+    compare(Ara, Arb) {
+        return Ara.join('@') !== Arb.join('@')
+    }
+
+
+
+
+    onRoute(callback) {
+        this.__e.on('onRoute', callback);
+    }
+    offRoute(callback) {
+        this.__e.off('onRoute', callback);
     }
 
 }
