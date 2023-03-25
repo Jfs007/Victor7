@@ -23,6 +23,10 @@ class Component extends Base {
     config() {
         
     }
+
+    behavior() {
+        
+    }
 }
 
 export default Component

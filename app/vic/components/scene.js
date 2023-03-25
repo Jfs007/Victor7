@@ -1,4 +1,4 @@
-import Component from "../core/component";
+import Component from "../../core/component";
 
 /**
  *  scene = 'sth'
@@ -19,12 +19,16 @@ class Scene extends Component {
     _name = 'scene';
     alias = '$s';
 
+    value = '';
+    
 
     get navigator() {
         let { Navigator } = vic.__components;
         return Navigator || {}
     }
 
+
+    
 
     constructor() {
         super();
@@ -33,8 +37,9 @@ class Scene extends Component {
         super.setup(vic);
     }
     remove() {
-
+        
     }
+    // update
 
 
 

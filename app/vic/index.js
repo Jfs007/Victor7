@@ -1,20 +1,27 @@
 
-import Navigate from './navigate';
-import Auth from './auth';
-import Scene from './scene';
-import LanuchApp from './launchApp';
+import Navigate from './components/navigate';
+import Auth from './components/auth';
+import Scene from './components/scene';
+import LanuchApp from './components/launchApp';
 
 import Component from '../core/component';
+
+import scope from './scope';
 
 /**
  * Victor 维克托 
  * 加入光荣的进化吧
+ * 
+ * 为小程序赋能，进化功能
  * 
  */
 
 class VicApp {
     name = 'vic';
     env = null;
+    __scope = {
+
+    };
     // 预设组件
     __components = {
         Navigate,
@@ -32,6 +39,7 @@ class VicApp {
         Object.keys(this.__components).map(componentName => {
             this.load(this.__components[componentName]).setup(this);
         });
+        return this;
 
     }
     use(key, value) {
@@ -43,6 +51,10 @@ class VicApp {
         this[component._name] = component;
         component.inject(this);
         return component;
+    }
+
+    applyScope(name, value) {
+        this.__scope[name] = value;
     }
 
 
@@ -89,29 +101,41 @@ function register(name, Component) {
     vic.load(Component).setup(vic);
 }
 
-// 只对Page有效 developing
-function effect(Page, PageOptions = {}) {
-    let { onRoute, onUnload, onShow } = PageOptions;
-    let routeFunction = (scope) => {
-        onRoute(scope);
-    };
-    // let isOn = false;
-    // PageOptions.onShow = function() {
-    //     if(onRoute && !isOn) {
-    //         vic.navigate.onRoute(routeFunction.bind(this));
-    //         isOn = true;
-    //     }
-        
-    //     onShow && onShow.call(this);
-    // }
 
-    // PageOptions.onUnload = function () {
-    //     vic.navigate.offRoute(routeFunction.bind(this));
-    //     onUnload && onUnload.call(this);
-    //     isOn = false;
-    // }
-    return Page(PageOptions);
+function matchRoute() {
+    let maps = {};
+    let isOn = false;
+    let on = ({ from, to }) => {
+        Object.keys(maps).map(key => {
+            // let func = maps[key];
+
+        })
+
+    }
+    return {
+        onRoute(routeMap = {}) {
+            maps = Object.assign(maps, routeMap);
+            if (!isOn) {
+                vic.navigate.onRoute(on);
+                isOn = true;
+            };
+
+        }
+    }
 }
+
+let { onRoute } = matchRoute();
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -119,16 +143,15 @@ function effect(Page, PageOptions = {}) {
 
 
 export {
-    // effect,
+    // onRoute,
+    vic,
+    use,
+    scope,
+    query,
     register,
     Component,
-    // changeQuery,
-    changeOptions,
-    query,
     getContext,
-    vic,
-    use
-
+    changeOptions,
 }
 
 

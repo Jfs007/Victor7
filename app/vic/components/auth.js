@@ -1,5 +1,5 @@
 
-import Component from "../core/component";
+import Component from "../../core/component";
 
 
 let getToken = (key) => {
@@ -27,6 +27,14 @@ class Auth extends Component {
     key = 'vic-auth';
     alias = '$a';
 
+
+    __config = {
+        isLogin() {
+            return this.userInfo.token;
+        }
+
+    }
+
     userInfo = {
         token: undefined
     };
@@ -34,6 +42,8 @@ class Auth extends Component {
         super();
         this.userInfo.token = this.getToken();
     }
+
+    
 
 
     updateUserInfo(info = {}) {
@@ -69,6 +79,10 @@ class Auth extends Component {
 
     getToken() {
         return getToken(this.key);
+    }
+
+    isLogin() {
+        return this.__config.isLogin.call(this);
     }
 
 }

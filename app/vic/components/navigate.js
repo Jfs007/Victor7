@@ -1,8 +1,8 @@
 
-import Define from '../core/define';
-import Url from '../utils/url';
-import Component from '../core/component';
-import { getContext } from '.'
+import Define from '../../core/define';
+import Url from '../../utils/url';
+import Component from '../../core/component';
+import { getContext } from '..'
 
 
 class Navigate extends Component {
@@ -16,14 +16,6 @@ class Navigate extends Component {
     history = [];
 
     pushRoute = '';
-
-
-
-
-
-
-
-
 
     constructor() {
         super();
@@ -50,32 +42,32 @@ class Navigate extends Component {
 
     }
     switchTab(options = {}) {
-        options = this.done({ options, routeFunction: 'switchTab' }, (path) => {
-            this.history = [path]
+        options = this.done({ options, routeFunction: 'switchTab' }, (urlObject) => {
+            this.history = [urlObject]
         })
         this.setQuery(options);
         this.define['switchTab'].call(this.__app, options);
     }
     reLaunch(options = {}) {
-        options = this.done({ options, routeFunction: 'reLaunch' }, (path) => {
-            this.history = [path]
+        options = this.done({ options, routeFunction: 'reLaunch' }, (urlObject) => {
+            this.history = [urlObject]
         })
         this.setQuery(options);
 
         this.define['reLaunch'].call(this.__app, options);
     }
     redirectTo(options = {}) {
-        options = this.done({ options, routeFunction: 'redirectTo' }, (path) => {
+        options = this.done({ options, routeFunction: 'redirectTo' }, (urlObject) => {
             this.history.pop();
-            this.history.push(path);
+            this.history.push(urlObject);
         })
         this.setQuery(options);
 
         this.define['redirectTo'].call(this.__app, options);
     }
     navigateTo(options = {}) {
-        options = this.done({ options, routeFunction: 'navigateTo' }, (path) => {
-            this.history.push(path);
+        options = this.done({ options, routeFunction: 'navigateTo' }, (urlObject) => {
+            this.history.push(urlObject);
         });
         this.setQuery(options);
 
@@ -89,9 +81,8 @@ class Navigate extends Component {
         } else {
             options.delta = delta || 1;
         }
-        options = this.done({ options, routeFunction: 'navigateBack' }, (path) => {
+        options = this.done({ options, routeFunction: 'navigateBack' }, (urlObject) => {
             this.history = this.history.slice(0, this.history.length - (options.delta || 1));
-            // this.history.pop();
         });
         this.setQuery({ url: url || '' });
         this.define['navigateBack'].call(this.__app, options);
@@ -111,6 +102,17 @@ class Navigate extends Component {
         return (url || '').replace(/\?.*/, '');
     }
 
+
+    getUrlObject(url = '') {
+        let route = (url || '').replace(/\?.*/, '');
+        return {
+            route: route.replace(/^\//, ''),
+            options: Url.query(url || '')
+        }
+    }
+
+
+
     getDelta() {
         let pointer = this.pointer;
         let delta = this.delta;
@@ -125,33 +127,35 @@ class Navigate extends Component {
         let ctx = getContext();
         let { onShow } = ctx;
         let navigate = this;
-
         let url = options.url;
-        if(!url || routeFunction == 'navigateBack') {
-            url = this.history[this.history.length - 2] || '';
+        let urlObject = null;
+        if (!url || routeFunction == 'navigateBack') {
+            urlObject = (this.history[this.history.length - 2] || {});
+            url = urlObject.route || '';
+        }else {
+            urlObject = this.getUrlObject(url);
         }
         let path = url.replace(/\?.*/, '');
         let _success = options.success;
         options.success = function (value) {
 
-            done(path, options);
+            done(urlObject, options);
             _success && _success(value);
             if (!navigate.pushRoute) {
                 navigate.__e.emit('onRoute', {
-                    to: path,
-                    from: ctx.route
+                    to: urlObject,
+                    from: ctx
                 });
                 navigate.pushRoute = path.replace(/^\//, '');
             }
 
-
             if (!ctx.__register) {
                 ctx.onShow = function (value) {
                     let from = navigate.history.slice(-1)[0];
-                    from = from.replace(/^\//, '');
-                    if (navigate.pushRoute === from) {
+                    let fromRoute = from.route.replace(/^\//, '');
+                    if (navigate.pushRoute === fromRoute) {
                         navigate.__e.emit('onRoute', {
-                            to: ctx.route,
+                            to: ctx,
                             from
                         });
                         navigate.history.pop();
@@ -167,21 +171,6 @@ class Navigate extends Component {
         return options;
     }
 
-    freezeOnShow() {
-        getCurrentPages().map(page => {
-            if (page.__register) {
-                page.__freeze = true;
-            }
-        })
-    }
-
-
-    compare(Ara, Arb) {
-        return Ara.join('@') !== Arb.join('@')
-    }
-
-
-
 
     onRoute(callback) {
         this.__e.on('onRoute', callback);
@@ -189,6 +178,11 @@ class Navigate extends Component {
     offRoute(callback) {
         this.__e.off('onRoute', callback);
     }
+    emitRoute(payload) {
+        this.__e.emit('onRoute', payload)
+    }
+
+    
 
 }
 
